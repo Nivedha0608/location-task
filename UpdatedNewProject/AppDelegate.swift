@@ -6,17 +6,38 @@
 //
 
 import UIKit
+import RealmSwift
+import CoreLocation
+import GoogleMaps
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        let config = Realm.Configuration(
+            schemaVersion: 1,
+            migrationBlock: { migration, oldSchemaVersion in
+                if oldSchemaVersion < 1 {
+                
+                    migration.enumerateObjects(ofType: LocationModel.className()) { oldObject, newObject in
+                        newObject?["userId"] = ""
+                    }
+                }
+            })
+        Realm.Configuration.defaultConfiguration = config
+
+      
+       
+        GMSServices.provideAPIKey("AIzaSyCX-Isgizqa9JgdvzF-CJsHD-XLmW87S6U")
         return true
     }
 
+    func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        LocationManager.shared.fetchAndSaveLocation()
+        completionHandler(.newData)
+    }
     // MARK: UISceneSession Lifecycle
 
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
